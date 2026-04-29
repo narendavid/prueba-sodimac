@@ -5,11 +5,10 @@ import styles from "./ProductDetailModal.module.css";
 
 interface ProductDetailModalProps {
   product: Product;
-  onClose: () => void;
 }
 
 export const ProductDetailModal = memo(
-  ({ product, onClose }: ProductDetailModalProps) => {
+  ({ product }: ProductDetailModalProps) => {
     const { addItem } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
