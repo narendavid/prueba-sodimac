@@ -80,7 +80,8 @@ export const ProductCard = memo(
               className={styles.detailLink}
               onClick={() => onOpenDetails(product)}
             >
-              Ver detalles →
+              Ver detalles
+              <span style={{ fontSize: '1.1em' }}>→</span>
             </button>
           )}
         </div>

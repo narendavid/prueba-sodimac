@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { useCart } from "@/features/cart/hooks/useCart";
 import type { CartItem as CartItemType } from "@/types/cart";
-import { formatPrice } from "@/utils/formatters";
 import styles from "./CartItem.module.css";
 
 interface CartItemProps {
@@ -45,7 +44,7 @@ export const CartItem = memo(({ item }: CartItemProps) => {
 
       <div className={styles.price}>
         <p className={styles.unitPrice}>{product.priceFormatted}</p>
-        <p className={styles.subtotal}>Subtotal: {formatPrice(subtotal)}</p>
+        <p className={styles.subtotal}>Subtotal: {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(subtotal)}</p>
       </div>
 
       <button

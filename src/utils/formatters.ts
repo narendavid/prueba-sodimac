@@ -6,7 +6,3 @@ export const formatPrice = (price: number): string => {
     maximumFractionDigits: 0,
   }).format(price);
 };
-
-export const isValidPrice = (price: unknown): boolean => {
-  return typeof price === "number" && price > 0;
-};

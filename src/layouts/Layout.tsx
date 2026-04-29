@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Header } from "./Header";
 import styles from "./Layout.module.css";
 
@@ -12,7 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <Header />
       <main className={styles.main}>{children}</main>
       <footer className={styles.footer}>
-        <p>&copy; 2024 Shopping Cart. All rights reserved.</p>
+        <p>&copy; 2026 desarrollado por Naren Luna</p>
       </footer>
     </div>
   );
