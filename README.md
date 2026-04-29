@@ -4,6 +4,16 @@ Aplicación de carrito de compras desarrollada con **React + TypeScript + Vite**
 
 ---
 
+## 🌐 Demo
+
+Puedes ver la aplicación desplegada aquí:
+
+👉 https://prueba-sodimac.vercel.app/
+
+La aplicación soporta navegación directa a rutas internas gracias a la configuración de rewrites en Vercel para aplicaciones SPA.
+
+---
+
 ## 🚀 Cómo correr el proyecto
 
 1. Clonar el repositorio:
