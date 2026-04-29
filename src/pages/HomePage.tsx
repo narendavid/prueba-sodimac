@@ -42,7 +42,6 @@ export const HomePage = () => {
         {selectedProduct && (
           <ProductDetailModal
             product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
           />
         )}
       </Modal>
