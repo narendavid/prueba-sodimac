@@ -10,7 +10,33 @@ export const CartPage = () => {
   const { items } = state;
 
   const handleCheckout = () => {
-    alert("Checkout implementado 🎉");
+    if (!state.items.length) return;
+
+    const cartData = {
+      date: new Date().toISOString(),
+      items: state.items.map((item) => ({
+        product: item.product.name,
+        quantity: item.quantity,
+        unitPrice: item.product.price,
+        totalPrice: item.product.price * item.quantity,
+      })),
+      total: state.items.reduce(
+        (acc, item) => acc + item.product.price * item.quantity,
+        0,
+      ),
+    };
+
+    const dataStr = JSON.stringify(cartData, null, 2);
+
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `cart-${Date.now()}.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
   };
 
   if (items.length === 0) {
