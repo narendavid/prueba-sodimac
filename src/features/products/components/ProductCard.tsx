@@ -2,20 +2,14 @@ import { memo, useState } from "react";
 import { useCart } from "@/features/cart/hooks/useCart";
 import type { Product } from "@/types/product";
 import styles from "./ProductCard.module.css";
-import { Link } from "react-router";
 
 interface ProductCardProps {
   product: Product;
-  showDetailLink?: boolean;
-  detailLinkHref?: string;
+  onOpenDetails?: (product: Product) => void;
 }
 
 export const ProductCard = memo(
-  ({
-    product,
-    showDetailLink = false,
-    detailLinkHref = "",
-  }: ProductCardProps) => {
+  ({ product, onOpenDetails }: ProductCardProps) => {
     const { addItem } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
@@ -81,15 +75,18 @@ export const ProductCard = memo(
             </button>
           </div>
 
-          {showDetailLink && detailLinkHref && (
-            <Link to={detailLinkHref} className={styles.detailLink}>
+          {onOpenDetails && (
+            <button
+              className={styles.detailLink}
+              onClick={() => onOpenDetails(product)}
+            >
               Ver detalles →
-            </Link>
+            </button>
           )}
         </div>
       </div>
     );
-  },
+  }
 );
 
 ProductCard.displayName = "ProductCard";

@@ -5,11 +5,11 @@ import styles from "./ProductList.module.css";
 
 interface ProductListProps {
   products: Product[];
-  showDetailLinks?: boolean;
+  onOpenDetails?: (product: Product) => void;
 }
 
 export const ProductList = memo(
-  ({ products, showDetailLinks = false }: ProductListProps) => {
+  ({ products, onOpenDetails }: ProductListProps) => {
     if (products.length === 0) {
       return (
         <div className={styles.empty}>
@@ -24,8 +24,7 @@ export const ProductList = memo(
           <ProductCard
             key={product.id}
             product={product}
-            showDetailLink={showDetailLinks}
-            detailLinkHref={`/product/${product.id}`}
+            onOpenDetails={onOpenDetails}
           />
         ))}
       </div>

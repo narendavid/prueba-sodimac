@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { useProducts } from "@/features/products/hooks";
-import { ProductList } from "@/features/products/components/ProductList";
+import { ProductList, ProductDetailModal } from "@/features/products/components";
+import { Modal } from "@/components/ui";
 import { Loading } from "@/components/ui/Loading";
 import { Error } from "@/components/ui/Error";
+import type { Product } from "@/types/product";
 import styles from "./HomePage.module.css";
 
 export const HomePage = () => {
   const { products, loading, error } = useProducts();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   if (loading) {
     return <Loading />;
@@ -26,7 +30,22 @@ export const HomePage = () => {
         Encuentra los mejores productos disponibles
       </p>
 
-      <ProductList products={products} showDetailLinks={true} />
+      <ProductList
+        products={products}
+        onOpenDetails={(product) => setSelectedProduct(product)}
+      />
+
+      <Modal
+        isOpen={selectedProduct !== null}
+        onClose={() => setSelectedProduct(null)}
+      >
+        {selectedProduct && (
+          <ProductDetailModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+          />
+        )}
+      </Modal>
     </div>
   );
 };
