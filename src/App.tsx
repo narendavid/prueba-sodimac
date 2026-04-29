@@ -1,7 +1,12 @@
-import React from "react";
+import { CartProvider } from "@/features/cart/context/cart.context";
+import { AppRouter } from "../app/router";
 
 const App = () => {
-  return <div>App</div>;
+  return (
+    <CartProvider>
+      <AppRouter />
+    </CartProvider>
+  );
 };
 
 export default App;
