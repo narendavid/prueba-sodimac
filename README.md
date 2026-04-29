@@ -1,153 +1,358 @@
-# 🛍️ Shopping Cart - Tienda Online Moderna
+# � Shopping Cart - Sodimac
 
-Proyecto de **Shopping Cart** completo construido con **React 19**, **TypeScript**, **Vite** y **Clean Architecture**.
+Aplicación web de carrito de compras desarrollada con React 19, TypeScript y Vite. Integrada con API de Sodimac para obtener el catálogo de productos en tiempo real.
 
-## ✨ Características
+## 🚀 Cómo correr el proyecto
 
-- ✅ **Listado de Productos**: Consumo de API externa con mapeo de datos
-- ✅ **Carrito de Compras**: Agregar, eliminar y modificar cantidades
-- ✅ **Persistencia**: LocalStorage automático del carrito
-- ✅ **Detalle de Producto**: Página individual con información completa
-- ✅ **Performance**: React.memo, useCallback, lazy loading
-- ✅ **TypeScript**: Tipado total y seguridad de tipos
-- ✅ **CSS Modules**: Estilos modulares sin librerías UI
-- ✅ **Responsive**: Diseño adaptable a todos los dispositivos
+### Requisitos previos
+- **Node.js** 18+ 
+- **npm** o **yarn**
 
-## 🏗️ Arquitectura
+### Instalación y ejecución
+
+```bash
+# 1. Clonar o descargar el proyecto
+cd prueba-sodimac
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Ejecutar en desarrollo
+npm run dev
+
+# 4. Abrir en el navegador
+# La aplicación estará disponible en: http://localhost:5173
+```
+
+### Comandos disponibles
+
+| Comando | Descripción |
+|---------|------------|
+| `npm run dev` | Inicia el servidor de desarrollo con hot reload |
+| `npm run build` | Compila TypeScript y genera build de producción |
+| `npm run preview` | Preview del build de producción |
+| `npm run lint` | Ejecuta ESLint para validar el código |
+
+## 🏗️ Decisiones Técnicas
+
+### 1. **Arquitectura Feature-based**
+```
+src/
+├── features/
+│   ├── cart/       # Lógica del carrito
+│   └── products/   # Lógica de productos
+├── pages/          # Páginas de la aplicación
+├── layouts/        # Componentes envolventes
+├── services/       # Llamadas API y mapeo de datos
+├── store/          # Estado global (reducers)
+└── types/          # Tipos TypeScript
+```
+
+**Ventajas:**
+- **Escalabilidad**: Fácil agregar nuevas features sin afectar existentes
+- **Encapsulación**: Cada feature es autónoma e independiente
+- **Mantenibilidad**: Código organizado por dominio, no por tipo
+- **Reutilización**: Lógica compartida mediante hooks personalizados
+
+### 2. **Context API + useReducer para estado global**
+
+Se eligió Context API en lugar de Redux/Zustand porque:
+- ✅ **Sin dependencias externas**: Reduce el weight del bundle
+- ✅ **Type-safe con TypeScript**: Tipos claros y autocompletado
+- ✅ **useReducer para lógica compleja**: Manejo predictible del estado
+- ✅ **Perfecta para proyectos medianos**: No overkill
+- ✅ **Performance**: Con React.memo y memoización evitamos re-renders innecesarios
+
+```typescript
+// Ejemplo: cart.context.tsx
+const [state, dispatch] = useReducer(cartReducer, initialState);
+const addItem = useCallback((product, quantity) => {
+  dispatch({ type: 'ADD_ITEM', payload: { product, quantity } });
+}, []);
+```
+
+### 3. **React Router v7 para navegación**
+
+Proporciona:
+- Routing declarativo y type-safe
+- Parámetros dinámicos (ej: `/product/:id`)
+- Mejor UX con transiciones suaves
+- Navegación basada en componentes
+
+### 4. **CSS Modules sin librerías UI**
+
+Se evitaron Bootstrap/Material-UI porque:
+- ✅ **Control total del diseño**: Personalizaciones sin limitaciones
+- ✅ **Menor bundle size**: Sin CSS innecesario
+- ✅ **Estilos encapsulados**: No hay conflictos de nombres
+- ✅ **Mejor rendimiento en mobile**: Menos CSS para parsear
+- ✅ **Mantenimiento simplificado**: CSS colocado junto a componentes
+
+**Ejemplo de responsive design:**
+```css
+.item {
+  grid-template-columns: 80px 1fr auto auto auto; /* Desktop */
+}
+
+@media (max-width: 768px) {
+  .item {
+    grid-template-columns: 60px 1fr 2rem; /* Mobile */
+    grid-template-areas: "image info removeButton" ...;
+  }
+}
+```
+
+### 5. **TypeScript para type-safety**
+
+Tipos definidos para cada entidad:
+- `Product`: Modelo de producto con tipos estrictos
+- `CartItem`: Producto + cantidad
+- `CartState`: Estado del carrito
+- Componentes con interfaces de props
+
+**Beneficios:**
+- Reduce bugs en tiempo de desarrollo
+- Autocompletado en el IDE
+- Documentación viva del código
+- Refactorings más seguros
+
+### 6. **Mapeo de datos API → Modelos internos**
+
+La respuesta de la API se transforma a un modelo limpio:
+
+```typescript
+// product.mapper.ts
+const mapApiProductToProduct = (item: ApiProduct): Product => ({
+  id: item.id,
+  name: item.name,
+  price: item.price,
+  priceFormatted: new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP'
+  }).format(item.price),
+  image: item.imageUrl,
+});
+```
+
+**Ventajas:**
+- Desacoplamiento de la API: Cambios en API no rompen componentes
+- Normalización de datos: Todos usan el mismo formato
+- Transformaciones centralizadas: Precios, fechas, etc.
+- Facilita testing: Mock de datos predecibles
+
+### 7. **Formateo de precios con Intl.NumberFormat**
+
+```typescript
+// Formato CLP automático
+new Intl.NumberFormat('es-CL', {
+  style: 'currency',
+  currency: 'CLP'
+}).format(price)
+// Resultado: $ 919.600
+```
+
+**Por qué NO usar librerías:**
+- ✅ Nativo de JavaScript (soporte completo)
+- ✅ Respeta locale del navegador
+- ✅ Sin dependencias externas
+- ✅ Mejor performance
+
+### 8. **localStorage para persistencia del carrito**
+
+El carrito se guarda automáticamente y se recupera al recargar:
+
+```typescript
+// En CartProvider
+useEffect(() => {
+  localStorage.setItem('cart', JSON.stringify(state));
+}, [state]);
+
+// Hidratación en mount
+const [state] = useState(() => {
+  const saved = localStorage.getItem('cart');
+  return saved ? JSON.parse(saved) : initialState;
+});
+```
+
+**Mejoras de UX:**
+- Los usuarios no pierden productos al recargar
+- Persistencia sin backend
+- Sincronización automática entre tabs
+- Funcionamiento offline
+
+### 9. **Optimizaciones de rendimiento**
+
+```typescript
+// React.memo: Previene re-renders innecesarios
+export const ProductCard = memo(({ product }) => {
+  // Solo se re-renderiza si props cambian
+});
+
+// useCallback: Funciones estables
+const addItem = useCallback((product, qty) => {
+  dispatch({ type: 'ADD_ITEM', payload: { product, qty } });
+}, []);
+
+// Lazy loading de imágenes
+<img src={url} loading="lazy" />
+
+// Separación en componentes pequeños
+<ProductCard />        // Solo se actualiza si product cambia
+<CartSummary />       // Solo se actualiza si total cambia
+```
+
+### 10. **Hooks personalizados para lógica reutilizable**
+
+```typescript
+// useCart() - Acceso centralizado al carrito
+const { addItem, removeItem, updateQuantity, getTotalPrice } = useCart();
+
+// useProducts() - Manejo de estado de lista
+const { products, loading, error } = useProducts();
+
+// useProduct(id) - Obtener producto individual
+const { product, loading, error } = useProduct(productId);
+```
+
+**Beneficios:**
+- Lógica desacoplada de componentes
+- Reutilización entre componentes
+- Fácil de testear
+- Separación de concerns
+
+## ✨ Características principales
+
+- ✅ **Listado de productos** desde API Sodimac en tiempo real
+- ✅ **Detalle de producto** en página individual con información completa
+- ✅ **Carrito de compras** con agregar/eliminar/editar cantidad
+- ✅ **Persistencia automática** de datos en localStorage
+- ✅ **Interfaz responsiva** optimizada para desktop y mobile
+- ✅ **Manejo robusto de errores** en carga de datos
+- ✅ **Estados de carga** con feedback visual (Loading, Error)
+- ✅ **Performance optimizado** con memoización y lazy loading
+
+## 🛣️ Rutas disponibles
+
+| Ruta | Descripción |
+|------|------------|
+| `/` | Home - Listado de productos |
+| `/product/:id` | Detalle de un producto con opción de agregar al carrito |
+| `/cart` | Página del carrito con resumen y opciones de compra |
+
+## 🔗 API utilizada
+
+```
+https://apim-dev-proxy.sodhc.co/test-jasson/api/category
+```
+
+**Respuesta esperada:**
+```json
+[
+  {
+    "id": "123",
+    "nombre": "Producto",
+    "descripcion": "...",
+    "precio": 50000,
+    "imagen": "url",
+    "stock": 10
+  }
+]
+```
+
+## 🎯 Stack tecnológico
+
+| Tecnología | Versión | Propósito |
+|-----------|---------|----------|
+| **React** | 19.2.5 | UI Framework moderno |
+| **TypeScript** | 6.0.2 | Type safety y DX |
+| **React Router** | 7.14.2 | Client-side routing |
+| **Vite** | 8.0.10 | Build tool ultrarrápido |
+| **CSS Modules** | Nativo | Estilos encapsulados |
+
+## 📦 Estructura de carpetas
 
 ```
 src/
-├── app/
-│   └── router.tsx           # Configuración de rutas
 ├── features/
-│   ├── products/
-│   │   ├── components/      # ProductCard, ProductList
-│   │   ├── hooks/           # useProducts, useProduct
-│   │   ├── pages/           # HomePage, ProductDetailPage
-│   │   └── services/        # product.mapper.ts
-│   └── cart/
-│       ├── components/      # CartItem, CartSummary
-│       ├── context/         # cart.context.tsx (Context + Reducer)
-│       ├── hooks/           # useCart
-│       └── pages/           # CartPage
-├── components/
-│   ├── ui/                  # Loading, Error
-│   └── layout/              # Header, Layout
+│   ├── cart/
+│   │   ├── components/
+│   │   │   ├── CartItem.tsx          # Item individual del carrito
+│   │   │   ├── CartSummary.tsx       # Resumen y total
+│   │   │   └── CartItem.module.css   # Estilos
+│   │   ├── context/
+│   │   │   └── cart.context.tsx      # Context + Reducer
+│   │   ├── hooks/
+│   │   │   └── useCart.ts            # Hook personalizado
+│   │   └── pages/
+│   │       └── CartPage.tsx
+│   └── products/
+│       ├── components/
+│       │   ├── ProductCard.tsx       # Card individual
+│       │   ├── ProductList.tsx       # Grid de productos
+│       │   └── ProductDetailModal.tsx
+│       ├── hooks/
+│       │   ├── useProducts.ts        # Obtener listado
+│       │   └── useProduct.ts         # Obtener individual
+│       ├── pages/
+│       │   ├── HomePage.tsx
+│       │   └── ProductDetailPage.tsx
+│       └── services/
+│           └── product.mapper.ts     # Transformación API
+├── pages/
+│   └── [Páginas principales]
+├── layouts/
+│   ├── Header.tsx                   # Navegación
+│   └── Layout.tsx                   # Wrapper principal
 ├── services/
-│   └── product.service.ts   # API calls
+│   └── product.service.ts           # Llamadas API
+├── store/
+│   └── cart.reducer.ts              # Lógica del reducer
 ├── types/
-│   ├── product.ts           # Product, ApiProduct
-│   └── cart.ts              # CartItem, CartState
+│   ├── product.ts                   # Tipos de productos
+│   └── cart.ts                      # Tipos del carrito
 ├── utils/
-│   └── formatters.ts        # Formateo de precios
-├── App.tsx                  # Componente raíz con CartProvider
-├── main.tsx                 # Punto de entrada
-└── index.css                # Estilos globales
+│   └── formatters.ts                # Utilidades
+├── App.tsx                          # Componente raíz
+├── main.tsx                         # Punto de entrada
+└── index.css                        # Estilos globales
 ```
 
-## 🚀 Inicio Rápido
+## 🐛 Solución de problemas
 
-### Instalación
+### El carrito no persiste
+- Verifica que localStorage esté habilitado (no estés en navegación privada)
+- Revisa la consola del navegador (F12 → Application → Storage)
+
+### Las imágenes no cargan
+- Valida que la API de Sodimac esté disponible
+- Revisa CORS en la pestaña Network del DevTools
+- Verifica que los URLs de imagen sean válidos
+
+### Productos no aparecen
+- Abre la consola (F12) y revisa errores en la pestaña Network
+- Verifica que la API responda correctamente en `/test-jasson/api/category`
+- Comprueba la estructura de la respuesta contra el mapper
+
+### Build falla por tipos TypeScript
 ```bash
-npm install
-```
-
-### Desarrollo
-```bash
-npm run dev
-```
-
-Abre [http://localhost:5173](http://localhost:5173) en tu navegador.
-
-### Build
-```bash
+# Valida tipos antes de build
 npm run build
+
+# O ejecuta type check manualmente
+npx tsc --noEmit
 ```
 
-### Preview
-```bash
-npm run preview
-```
+## 📚 Recursos útiles
 
-## 📝 Rutas de la Aplicación
+- [React 19 Docs](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [React Router Docs](https://reactrouter.com)
+- [Vite Guide](https://vitejs.dev)
+- [MDN: Intl API](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Intl)
 
-| Ruta | Descripción |
-|------|-------------|
-| `/` | Página de inicio - Listado de productos |
-| `/product/:id` | Página de detalle de producto |
-| `/cart` | Página del carrito |
+---
 
-## 🔧 Tecnologías Utilizadas
-
-- **React 19.2** - Librería UI
-- **TypeScript 6.0** - Lenguaje tipado
-- **Vite 8.0** - Build tool y dev server
-- **React Router 7.14** - Enrutamiento
-- **Context API + useReducer** - Gestión de estado
-- **CSS Modules** - Estilos modulares
-- **Fetch API** - Llamadas HTTP
-
-## 💡 Conceptos Clave
-
-### 1. **Feature-Based Architecture**
-La aplicación está organizada por features (productos, carrito) con su propia lógica, componentes y servicios.
-
-### 2. **Context API + Reducer**
-Estado global del carrito manejado con `useReducer` para lógica compleja y consistente.
-
-```typescript
-// Acceso al contexto
-const { addItem, removeItem, getTotalPrice } = useCart();
-```
-
-### 3. **Mapeo de Datos**
-La respuesta de la API se transforma a un modelo limpio y tipado:
-
-```typescript
-// API responde con campos diferentes
-{ nombre, marca, imagen, precio, ... }
-
-// Se mapea a nuestro modelo
-{ name, brand, image, price, priceFormatted, ... }
-```
-
-### 4. **Persistencia Automática**
-El carrito se guarda en `localStorage` automáticamente y se restaura al cargar la página.
-
-### 5. **Hooks Personalizados**
-Encapsulan la lógica de negocios:
-- `useCart()` - Acceso al carrito
-- `useProducts()` - Obtener lista de productos
-- `useProduct(id)` - Obtener producto individual
-
-## 📊 Flujo de Datos
-
-```
-HomePage
-  ↓
-useProducts() → API → mapApiProductsToProducts() → ProductList → ProductCard
-                                                         ↓
-                                                   useCart().addItem()
-                                                         ↓
-                                                  CartContext (localStorage)
-                                                         ↓
-                                                    CartPage
-```
-
-## ⚡ Performance
-
-- **React.memo**: Previene re-renders innecesarios en ProductCard y CartItem
-- **useCallback**: Funciones estables en el contexto
-- **useMemo**: Cálculos memorizados en resúmenes
-- **Lazy loading**: Imágenes con atributo `loading="lazy"`
-
-## 🎨 Estilos
-
-Sin dependencias de librerías UI. Todo hecho con CSS Modules puro:
-- Colores consistentes
-- Diseño responsive
-- Transiciones suaves
-- Hover states definidos
+**Desarrollado con ❤️ para Sodimac**
 
 ### Paleta de Colores
 - **Primario**: #3498db (azul)
