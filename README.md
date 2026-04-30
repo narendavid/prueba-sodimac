@@ -82,6 +82,8 @@ El carrito se guarda en `localStorage` para mantener la información incluso des
 * Vite
 * React Router DOM
 
+Consideré que no era necesario agregar una librería de manejo de estado global como Redux o Zustand para esta aplicación, ya que el contexto y `useReducer` son suficientes para manejar el estado del carrito de manera eficiente.
+
 ---
 
 ## ✨ Notas

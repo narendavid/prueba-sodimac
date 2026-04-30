@@ -1,7 +1,7 @@
 import { memo, useState } from "react";
 import { useCart } from "@/features/cart/hooks/useCart";
 import type { Product } from "@/types/product";
-import styles from "./ProductCard.module.css";
+import styles from "./styles.module.css";
 
 interface ProductCardProps {
   product: Product;

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useCart } from "@/features/cart/hooks/useCart";
 import { formatPrice } from "@/utils/formatters";
-import styles from "./CartSummary.module.css";
+import styles from "./styles.module.css";
 
 interface CartSummaryProps {
   onCheckout?: () => void;

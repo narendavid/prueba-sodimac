@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useCart } from "@/features/cart/hooks/useCart";
 import type { CartItem as CartItemType } from "@/types/cart";
-import styles from "./CartItem.module.css";
+import styles from "./styles.module.css";
 
 interface CartItemProps {
   item: CartItemType;

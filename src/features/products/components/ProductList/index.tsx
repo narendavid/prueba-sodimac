@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { Product } from "@/types/product";
-import { ProductCard } from "./ProductCard";
-import styles from "./ProductList.module.css";
+import { ProductCard } from "../ProductCard";
+import styles from "./styles.module.css";
 
 interface ProductListProps {
   products: Product[];
